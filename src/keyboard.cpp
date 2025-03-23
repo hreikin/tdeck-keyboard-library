@@ -12,12 +12,12 @@ Keyboard::Keyboard()
 {
     _currentBrightness = KEYBOARD_BRIGHTNESS_DEFAULT;
     _keymapIndex = 0;
-    _alt = false;
-    _ctrl = false;
-    _shift = false;
-    _sym = false;
-    _mic = false;
-    _speaker = false;
+    _altState = false;
+    _ctrlState = false;
+    _shiftState = false;
+    _symState = false;
+    _micState = false;
+    _speakerState = false;
     for (int i = 0; i < KEY_INFO_SIZE; ++i)
     {
         _keyInfo[i] = EMPTY;
@@ -55,10 +55,51 @@ void Keyboard::begin()
     }
 }
 
-void Keyboard::read()
+void Keyboard::getCharInfo()
 {
-    // Placeholder for reading the key matrix
-    // This function should read the key matrix and process the key presses
+    // Placeholder for getting the character info
+    // This function should return the charInfo array for the user.
+    // The charInfo array should contain modifier bools, function bools, function commands, and character codes
+
+    _readKeys();
+    _parseHIDModifierBitmask();
+}
+
+uint8_t Keyboard::getBrightness()
+{
+    return _currentBrightness;
+}
+
+void Keyboard::_readKeys()
+{
+    // This function should read the key info and process the key presses
+    Wire.requestFrom(I2C_DEV_ADDR, KEY_INFO_SIZE);
+    for (int i = 0; i < KEY_INFO_SIZE && Wire.available() > 0; i++)
+    {
+        _keyInfo[i] = Wire.read();
+    }
+}
+
+void Keyboard::_parseHIDModifierBitmask()
+{
+    // Array of pointers to modifier state variables
+    bool* modifierStates[] = { &_ctrlState, &_shiftState, &_altState, &_symState };
+
+    // Parse the first byte of _keyInfo to determine active modifiers
+    for (uint8_t i = 0; i < MODIFIER_COUNT; i++)
+    {
+        *modifierStates[i] = _keyInfo[0] & (1 << i);
+    }
+    // debug
+    Serial.println("Modifiers: ");
+    Serial.print("Ctrl: ");
+    Serial.println(_ctrlState);
+    Serial.print("Shift: ");
+    Serial.println(_shiftState);
+    Serial.print("Alt: ");
+    Serial.println(_altState);
+    Serial.print("Sym: ");
+    Serial.println(_symState);
 }
 
 void Keyboard::_setBrightness(uint8_t brightness)
@@ -67,19 +108,8 @@ void Keyboard::_setBrightness(uint8_t brightness)
     // This function should set the brightness of the keyboard backlight
 }
 
-uint8_t Keyboard::getBrightness()
+void Keyboard::_parseKeyInfo()
 {
-    return _currentBrightness;
-}
-
-void Keyboard::_scanKeys()
-{
-    // Placeholder for scanning keys logic
-    // This function should read the key states and update _keyInfo
-}
-
-void Keyboard::_processKey(uint8_t row, uint8_t col)
-{
-    // Placeholder for processing a key press
-    // This function should handle the key press based on the current keymap
+    // Placeholder for processing a key info
+    // This function should handle the key press based on the current keymap and any shortcuts, modifiers, etc.
 }
