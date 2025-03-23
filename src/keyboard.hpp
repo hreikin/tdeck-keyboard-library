@@ -35,22 +35,30 @@
 #define MAX_KEYMAP_INDEX 8
 #define KEY_INFO_SIZE 8
 #define EMPTY 0x00
+#define MODIFIER_COUNT 4
 
 class Keyboard
 {
 public:
+    // TODO: read keyInfo, set bools for modifiers, set bools for mic/speaker functions, 
+    // TODO: set command values for mic/speaker functions, convert keycodes to CP437 character codes,
+    // TODO: use wire to set keyboard brightness, handle keymap index, handle alt/ctrl/shift/caps lock
+    // TODO: set a charInfo array for the end user, contains modifier bools, function bools, 
+    // TODO: function commands, and character codes
     Keyboard();
     void begin();
-    void read(); // read the key codes, process them and perform an action or return them for the end user to process
+    void getCharInfo();
     uint8_t getBrightness();
     
-private:
-bool _alt;
-    bool _ctrl;
-    bool _shift;
-    bool _sym;
-    bool _mic;
-    bool _speaker;
+    private:
+    bool _altState;
+    bool _ctrlState;
+    bool _shiftState;
+    bool _symState;
+    bool _micState;
+    bool _speakerState;
+    uint8_t _micCommand;
+    uint8_t _speakerCommand;
     uint8_t _currentBrightness;
     uint8_t _keymapIndex;
     uint8_t _keyInfo[KEY_INFO_SIZE]; // modifier masks, reserved byte, keycode 1, keycode 2, keycode 3, keycode 4, keycode 5, keycode 6
@@ -63,9 +71,10 @@ bool _alt;
     char (*_symbolKeymap6)[COL_COUNT];
     char (*_symbolKeymap7)[COL_COUNT];
     char (*_symbolKeymap8)[COL_COUNT];
+    void _readKeys(); // read the key codes, process them and perform an action or return them for the end user to process
     void _setBrightness(uint8_t brightness);
-    void _scanKeys();
-    void _processKey(uint8_t row, uint8_t col);
+    void _parseHIDModifierBitmask();
+    void _parseKeyInfo();
 };
 
 #endif // KEYBOARD_HPP
